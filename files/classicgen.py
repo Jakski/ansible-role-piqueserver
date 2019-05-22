@@ -1,0 +1,9 @@
+name = 'Classigen'
+version = '1.0'
+author = 'Tom Dobrowolski'
+description = ('Classic generated maps')
+
+def gen_script(basename, seed):
+    from pyspades.mapmaker import generate_classic
+    return generate_classic(seed)
+

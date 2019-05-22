@@ -1,0 +1,31 @@
+---
+driver:
+  name: docker
+lint:
+  name: yamllint
+  enabled: false
+verifier:
+  name: testinfra
+  lint:
+    name: flake8
+platforms:
+  - name: ${MOLECULE_INSTANCE_NAME:-instance}
+    image: jakski/systemd:debian-9
+    command: /sbin/init
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:ro
+    privileged: true
+    tty: true
+provisioner:
+  name: ansible
+  config_options:
+    defaults:
+      stdout_callback: yaml
+  playbooks:
+    docker:
+      create: ../docker-create.yml
+    converge: playbook.yml
+  inventory:
+    group_vars:
+      all:
+        ansible_python_interpreter: /usr/bin/python3

@@ -1,0 +1,71 @@
+###
+# System service name
+piqueserver_service: piqueserver
+
+###
+# Enable system service
+piqueserver_enable: true
+
+###
+# Restart service when necessary
+piqueserver_restart: true
+
+###
+# Directory for Python virtual environment
+piqueserver_venv_dir: /opt/piqueserver
+
+###
+# System packages to install before setting up virtual environment
+piqueserver_dependencies:
+  - gcc
+  - python3
+  - python3-setuptools
+  - python3-venv
+  - python3-dev
+  - libssl-dev
+  - libffi-dev
+  - libjpeg-dev
+  - zlib1g-dev
+
+###
+# requirements.txt for Python virtual environment
+piqueserver_requirements: "{{ lookup('file', 'requirements.txt') }}"
+
+###
+# System user for server process
+piqueserver_user: piqueserver
+
+###
+# Main configuration file
+piqueserver_config: "{{ lookup('file', 'config.json') | from_json }}"
+
+###
+# Directory for configuration files
+piqueserver_config_dir: /etc/piqueserver
+
+###
+# Directory for persistent data, e.g.: ban list
+piqueserver_lib_dir: "{{ (piqueserver_config.bans.file | dirname) if piqueserver_config.bans is defined else '/var/lib/piqueserver' }}"
+
+###
+# Directory for logs
+piqueserver_log_dir: "{{ (piqueserver_config.logfile | dirname) if piqueserver_config.logfile is defined else '/var/log/piqueserver' }}"
+
+###
+# Python command to use with virtual environment
+piqueserver_python: /usr/bin/python3
+
+###
+# Dictionary with scripts. `.py` extension is automatically added to filenames from keys.
+# Values should contain strings with Python scripts.
+piqueserver_scripts: {}
+
+###
+# Dictionary with game modes. `.py` extension is automatically added to filenames from keys.
+# Values should contain strings with Python scripts.
+piqueserver_game_modes: {}
+
+###
+# Dictionary with maps. Values should contain paths to files on controller.
+piqueserver_maps:
+  classicgen.txt: classicgen.py

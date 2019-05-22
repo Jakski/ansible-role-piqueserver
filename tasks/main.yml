@@ -1,0 +1,107 @@
+---
+- name: Install system dependencies
+  apt:
+    name: "{{ piqueserver_dependencies }}"
+    state: present
+  notify:
+    - Restart piqueserver
+
+- name: Setup piqueserver user
+  user:
+    name: "{{ piqueserver_user }}"
+    create_home: true
+    home: "{{ piqueserver_venv_dir }}"
+    password_lock: true
+    system: true
+
+- name: Create directories for persistent data, logs and configuration
+  file:
+    path: "{{ item.path }}"
+    state: directory
+    owner: "{{ item.owner | default(piqueserver_user) }}"
+    group: "{{ item.group | default(piqueserver_user) }}"
+    mode: 0770
+  loop:
+    - path: "{{ piqueserver_log_dir }}"
+      owner: root
+    - path: "{{ piqueserver_config_dir }}"
+    - path: "{{ piqueserver_lib_dir }}"
+    - path: "{{ piqueserver_lib_dir }}/game_modes"
+    - path: "{{ piqueserver_lib_dir }}/scripts"
+    - path: "{{ piqueserver_lib_dir }}/maps"
+
+- name: Upload requirements.txt
+  copy:
+    content: "{{ piqueserver_requirements }}"
+    dest: "{{ piqueserver_config_dir }}/requirements.txt"
+    owner: root
+    group: "{{ piqueserver_user }}"
+    mode: 0640
+
+- name: Upload configuration file
+  copy:
+    content: "{{ piqueserver_config | to_nice_json }}"
+    dest: "{{ piqueserver_config_dir }}/config.json"
+    owner: "{{ piqueserver_user }}"
+    group: "{{ piqueserver_user }}"
+    mode: 0660
+  notify:
+    - Restart piqueserver
+
+- name: Upload scripts
+  copy:
+    content: "{{ item.value }}"
+    dest: "{{ piqueserver_lib_dir }}/scripts/{{ item.key }}.py"
+    owner: "{{ piqueserver_user }}"
+    group: "{{ piqueserver_user }}"
+    mode: 0660
+  loop: "{{ piqueserver_scripts | dict2items }}"
+
+- name: Upload game modes
+  copy:
+    content: "{{ item.value }}"
+    dest: "{{ piqueserver_lib_dir }}/game_modes/{{ item.key }}.py"
+    owner: "{{ piqueserver_user }}"
+    group: "{{ piqueserver_user }}"
+    mode: 0660
+  loop: "{{ piqueserver_game_modes | dict2items }}"
+
+- name: Upload maps
+  copy:
+    src: "{{ item.value }}"
+    dest: "{{ piqueserver_lib_dir }}/maps/{{ item.key }}"
+    owner: "{{ piqueserver_user }}"
+    group: "{{ piqueserver_user }}"
+    mode: 0660
+  loop: "{{ piqueserver_maps | dict2items }}"
+
+- name: Setup Python virtual environment
+  become: true
+  become_user: "{{ piqueserver_user }}"
+  pip:
+    requirements: "{{ piqueserver_config_dir }}/requirements.txt"
+    virtualenv: "{{ piqueserver_venv_dir }}"
+    virtualenv_command: "{{ piqueserver_python }} -m venv"
+  notify:
+    - Restart piqueserver
+
+- name: Create systemd service file
+  template:
+    src: service.j2
+    dest: /etc/systemd/system/{{ piqueserver_service }}.service
+    owner: root
+    group: root
+    mode: 0644
+  register: _piqueserver_service
+  notify:
+    - Restart piqueserver
+
+- name: Reload systemd # noqa 503
+  systemd:
+    daemon_reload: true
+  when: _piqueserver_service.changed
+
+- name: "{{ piqueserver_enable | ternary('Enable', 'Disable') }} piqueserver service"
+  service:
+    name: "{{ piqueserver_service }}"
+    enabled: "{{ piqueserver_enable }}"

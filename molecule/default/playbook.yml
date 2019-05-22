@@ -1,0 +1,10 @@
+---
+- hosts: instance
+  tasks:
+    - name: Install sudo to enable become
+      apt:
+        name: sudo
+        state: present
+
+    - import_role:
+        name: piqueserver

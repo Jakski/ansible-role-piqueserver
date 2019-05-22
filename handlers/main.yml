@@ -1,0 +1,6 @@
+---
+- name: Restart piqueserver
+  service:
+    name: "{{ piqueserver_service }}"
+    state: restarted
+  when: piqueserver_restart

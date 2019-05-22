@@ -1,0 +1,96 @@
+ansible-role-piqueserver
+************************
+
+Role to setup piqueserver
+
+
+Variables
+=========
+
+piqueserver_service
+
+   System service name
+
+piqueserver_enable
+
+   Enable system service
+
+piqueserver_restart
+
+   Restart service when necessary
+
+piqueserver_venv_dir
+
+   Directory for Python virtual environment
+
+piqueserver_dependencies
+
+   System packages to install before setting up virtual environment
+
+piqueserver_requirements
+
+   requirements.txt for Python virtual environment
+
+piqueserver_user
+
+   System user for server process
+
+piqueserver_config
+
+   Main configuration file
+
+piqueserver_config_dir
+
+   Directory for configuration files
+
+piqueserver_lib_dir
+
+   Directory for persistent data, e.g.: ban list
+
+piqueserver_log_dir
+
+   Directory for logs
+
+piqueserver_python
+
+   Python command to use with virtual environment
+
+piqueserver_scripts
+
+   Dictionary with scripts. *.py* extension is automatically added to
+   filenames from keys. Values should contain strings with Python
+   scripts.
+
+piqueserver_game_modes
+
+   Dictionary with game modes. *.py* extension is automatically added
+   to filenames from keys. Values should contain strings with Python
+   scripts.
+
+piqueserver_maps
+
+   Dictionary with maps. Values should contain paths to files on
+   controller.
+
+
+Examples
+========
+
+   ---
+   - hosts: instance
+     tasks:
+       - import_role:
+           name: piqueserver
+
+
+Documentation
+=============
+
+Compile:
+
+   $ pip3 install -r requirements.txt
+   $ make man
+
+View:
+
+   $ man ./docs/man/ansible-role-piqueserver.1

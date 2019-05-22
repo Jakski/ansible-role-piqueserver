@@ -1,0 +1,19 @@
+[Unit]
+Description=An Ace of Spades 0.75 server based on PySnip
+Documentation=https://docs.piqueserver.org/en/latest/config-options.html
+
+[Service]
+Type=simple
+ExecStart={{ piqueserver_venv_dir }}/bin/piqueserver -c {{ piqueserver_config_dir }}/config.json -d {{ piqueserver_lib_dir }}
+User={{ piqueserver_user }}
+Group={{ piqueserver_user }}
+PrivateTmp=yes
+Restart=on-failure
+ProtectSystem=full
+SystemCallFilter=~@mount
+RestrictRealtime=yes
+ReadWritePaths={{ piqueserver_lib_dir }}
+ReadWritePaths={{ piqueserver_log_dir }}
+
+[Install]
+WantedBy=multi-user.target
