@@ -65,6 +65,8 @@
     group: "{{ piqueserver_user }}"
     mode: 0660
   loop: "{{ piqueserver_game_modes | dict2items }}"
+  loop_control:
+    label: "{{ item.key }}"
 
 - name: Upload maps
   copy:
